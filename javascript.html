@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<title>JavaScript CRUD</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="navbar">
+    <div class="logo">RB Pizzéria</div>
+    <nav>
+        <ul class="nav-links">
+            <li><a href="index.html">Főoldal</a></li>
+            <li><a href="javascript.html" class="active">JavaScript CRUD</a></li>
+            <li><a href="react.html">React</a></li>
+            <li><a href="spa.html">SPA</a></li>
+            <li><a href="fetchapi.html">Fetch API</a></li>
+            <li><a href="axios.html">Axios</a></li>
+            <li><a href="oojs.html">OOJS</a></li>
+        </ul>
+    </nav>
+</header>
+
+<main class="container">
+
+<h2>Pizzák kezelése (JavaScript - tömb)</h2>
+
+<!-- FORM -->
+<div class="form-container">
+
+    <div class="input-group">
+        <label>Pizza neve</label>
+        <input id="nev" placeholder="Pl. BBQ Chicken">
+    </div>
+
+    <div class="input-group">
+        <label>Kategória</label>
+        <select id="kategoria">
+            <option value="">Válassz...</option>
+            <option value="apród">Apród</option>
+            <option value="lovag">Lovag</option>
+            <option value="főnemes">Főnemes</option>
+            <option value="király">Király</option>
+        </select>
+    </div>
+
+    <div class="input-group checkbox">
+        <label>
+            <input type="checkbox" id="veg">
+            Vegetáriánus
+        </label>
+    </div>
+
+    <button onclick="add()" class="btn-primary">
+        ➕ Hozzáadás
+    </button>
+
+</div>
+
+<div id="lista" class="pizza-grid"></div>
+
+</main>
+
+<footer class="footer">
+    <p>Készítette: Csordás Bence (BTWACN) | Nagy Róbert Levente (B2CPCL)</p>
+</footer>
+
+<script>
+
+// ===== TÖMB =====
+let pizzak = [
+    { nev: "Áfonyás", kategorianev: "király", vegetarianus: 0 },
+    { nev: "Babos", kategorianev: "lovag", vegetarianus: 0 },
+    { nev: "Barbecue chicken", kategorianev: "lovag", vegetarianus: 0 },
+    { nev: "Betyáros", kategorianev: "király", vegetarianus: 0 },
+    { nev: "Caribi", kategorianev: "apród", vegetarianus: 0 },
+    { nev: "Country", kategorianev: "király", vegetarianus: 0 },
+    { nev: "Csabesz", kategorianev: "király", vegetarianus: 0 },
+    { nev: "Csupa sajt", kategorianev: "lovag", vegetarianus: 1 },
+    { nev: "Erdő kapitánya", kategorianev: "apród", vegetarianus: 0 },
+    { nev: "Erős János", kategorianev: "lovag", vegetarianus: 0 },
+    { nev: "Excellent", kategorianev: "király", vegetarianus: 0 },
+    { nev: "Főnök kedvence", kategorianev: "lovag", vegetarianus: 0 },
+    { nev: "Francia", kategorianev: "főnemes", vegetarianus: 0 },
+    { nev: "Frankfurti", kategorianev: "király", vegetarianus: 0 },
+    { nev: "Füstös", kategorianev: "lovag", vegetarianus: 0 },
+    { nev: "Gino", kategorianev: "király", vegetarianus: 0 },
+    { nev: "Gombás", kategorianev: "apród", vegetarianus: 1 },
+    { nev: "Góré", kategorianev: "lovag", vegetarianus: 0 },
+    { nev: "Görög", kategorianev: "király", vegetarianus: 0 },
+    { nev: "Gyros pizza", kategorianev: "király", vegetarianus: 0 },
+    { nev: "Hawaii", kategorianev: "főnemes", vegetarianus: 0 },
+    { nev: "Király pizza", kategorianev: "király", vegetarianus: 0 },
+    { nev: "Kolbászos", kategorianev: "apród", vegetarianus: 0 },
+    { nev: "Magvas", kategorianev: "király", vegetarianus: 1 },
+    { nev: "Magyaros", kategorianev: "lovag", vegetarianus: 0 }
+];
+// ===== RENDER =====
+function render() {
+    const lista = document.getElementById("lista");
+
+    if (pizzak.length === 0) {
+        lista.innerHTML = "<p>Nincs pizza</p>";
+        return;
+    }
+
+    lista.innerHTML = pizzak.map((p, index) => `
+        <div class="pizza-card">
+            <h3>${escapeHtml(p.nev)}</h3>
+            <p><strong>Kategória:</strong> ${capitalize(p.kategorianev)}</p>
+            <p><strong>Típus:</strong> ${p.vegetarianus === 1 ? "Veg" : "Nem veg"}</p>
+
+            <button onclick="toggleVeg(${index})">
+                Állapot váltás
+            </button>
+
+            <button onclick="edit(${index})">
+                Szerkesztés
+            </button>
+
+            <button onclick="torol(${index})">
+                Törlés
+            </button>
+        </div>
+    `).join("");
+}
+
+// ===== CREATE =====
+function add() {
+    const nevInput = document.getElementById("nev");
+    const katInput = document.getElementById("kategoria");
+    const vegInput = document.getElementById("veg");
+
+    const nev = nevInput.value.trim();
+    const kat = katInput.value;
+    const veg = vegInput.checked ? 1 : 0;
+
+    if (!nev || !kat) {
+        alert("Adj meg nevet és kategóriát!");
+        return;
+    }
+
+    pizzak.push({
+        nev,
+        kategorianev: kat,
+        vegetarianus: veg
+    });
+
+    nevInput.value = "";
+    katInput.selectedIndex = 0;
+    vegInput.checked = false;
+
+    render();
+}
+
+// ===== UPDATE (1) =====
+function toggleVeg(index){
+    pizzak[index].vegetarianus =
+        pizzak[index].vegetarianus === 1 ? 0 : 1;
+
+    render();
+}
+
+// ===== UPDATE (2) =====
+function edit(index){
+    const ujNev = prompt("Új név:", pizzak[index].nev);
+    const ujKat = prompt("Új kategória:", pizzak[index].kategorianev);
+
+    if(ujNev && ujKat){
+        pizzak[index].nev = ujNev;
+        pizzak[index].kategorianev = ujKat;
+        render();
+    }
+}
+
+// ===== DELETE =====
+function torol(index) {
+    pizzak.splice(index, 1);
+    render();
+}
+
+// ===== SEGÉDEK =====
+function capitalize(text) {
+    return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+function escapeHtml(text) {
+    return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+}
+
+// ===== INIT =====
+render();
+
+</script>
+</body>
+</html>
