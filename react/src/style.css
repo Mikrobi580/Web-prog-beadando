@@ -1,0 +1,127 @@
+.react-page {
+  width: min(1120px, 92%);
+  margin: 48px auto;
+}
+
+.react-page h1,
+.tool-panel h2 {
+  color: #b91c1c;
+  margin-bottom: 10px;
+}
+
+.react-page > p {
+  margin-bottom: 24px;
+}
+
+.react-form,
+.tool-panel {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 16px;
+  align-items: end;
+  margin: 24px 0;
+  padding: 20px;
+  border: 1px solid #d7dee8;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.react-form label,
+.tool-panel label {
+  display: grid;
+  gap: 6px;
+  font-weight: 700;
+}
+
+.react-form input,
+.react-form select,
+.tool-panel input,
+.tool-panel select {
+  min-height: 42px;
+  border: 1px solid #b8c2cc;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font: inherit;
+}
+
+.react-check {
+  display: flex !important;
+  grid-template-columns: none !important;
+  align-items: center;
+  gap: 10px !important;
+}
+
+.react-check input {
+  min-height: auto;
+}
+
+.react-form button,
+.tool-panel button,
+.spa-tabs button,
+.memory-card {
+  min-height: 42px;
+  border: 0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-weight: 700;
+  cursor: pointer;
+  color: #ffffff;
+  background: #b91c1c;
+}
+
+.react-form button:hover,
+.tool-panel button:hover,
+.spa-tabs button:hover {
+  background: #166534;
+}
+
+.muted-button {
+  color: #1f2937 !important;
+  background: #e5e7eb !important;
+}
+
+.spa-tabs {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 20px 0;
+}
+
+.spa-tabs button.active {
+  background: #166534;
+}
+
+.result-box {
+  font-size: 32px;
+  font-weight: 800;
+  color: #166534;
+}
+
+.memory-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(72px, 1fr));
+  gap: 10px;
+  grid-column: 1 / -1;
+}
+
+.memory-card {
+  aspect-ratio: 1;
+  background: #1f2937;
+  font-size: 16px;
+}
+
+.memory-card.open {
+  color: #111827;
+  background: #facc15;
+}
+
+@media (max-width: 640px) {
+  .react-page {
+    width: min(100% - 24px, 1120px);
+    margin: 28px auto;
+  }
+
+  .memory-grid {
+    grid-template-columns: repeat(2, minmax(92px, 1fr));
+  }
+}
