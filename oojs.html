@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OOJS - RB Pizzéria</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="oojs-page">
+ 
+    <header class="navbar">
+        <div class="logo">🍕 RB Pizzéria</div>
+        <nav>
+            <ul class="nav-links">
+                <li><a href="index.html">Főoldal</a></li>
+                <li><a href="javascript.html">JavaScript CRUD</a></li>
+                <li><a href="fetchapi.html">Fetch API</a></li>
+                <li><a href="axios.html">Axios</a></li>
+                <li><a href="react.html">React</a></li>
+                <li><a href="spa.html">SPA</a></li>
+                <li><a href="oojs.html" class="active">OOJS</a></li>
+            </ul>
+        </nav>
+    </header>
+ 
+    <section class="hero small-hero">
+        <div class="hero-content">
+            <h1>OOJS Pizza Generátor</h1>
+            <p>Objektumorientált JavaScript alapú grafikus alkalmazás.</p>
+        </div>
+    </section>
+ 
+    <main class="container">
+        <section class="intro">
+            <h2>Pizza generálása</h2>
+            <p>
+                Ez az oldal egy OOJS alapú grafikus alkalmazás, amely véletlenszerű pizzát
+                készít különböző feltétekkel.
+            </p>
+        </section>
+ 
+        <section class="oojs-section">
+            <div class="oojs-controls-card">
+                <h3>Új pizza készítése</h3>
+                <p>Kattints a gombra, és generálunk egy új pizzát.</p>
+                <button class="crud-btn" onclick="ujPizza()">Pizza generálása</button>
+            </div>
+ 
+            <div class="oojs-layout">
+                <div class="oojs-list-card">
+                    <h3>Kiválasztott feltétek</h3>
+                    <ul id="lista" class="feltet-lista"></ul>
+                </div>
+ 
+                <div class="oojs-pizza-card">
+                    <h3>Generált pizza</h3>
+                    <div class="pizza-stage">
+                        <div id="pizza" class="pizza-base"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+ 
+    <footer class="footer">
+        <p>Készítette:Csordás Bence (BTWACN) | Nagy Róbert Levente (B2CPCL)</p>
+    </footer>
+ 
+<script>
+    // ===== ALAP OSZTÁLY =====
+    class AlapElem {
+        constructor(id) {
+            this.elem = document.getElementById(id);
+        }
+ 
+        torles() {
+            this.elem.innerHTML = "";
+        }
+    }
+ 
+    // ===== LISTA OSZTÁLY =====
+    class Lista extends AlapElem {
+        constructor(id) {
+            super(id);
+        }
+ 
+        render(feltetek) {
+            this.torles();
+ 
+            feltetek.forEach(feltet => {
+                const li = document.createElement("li");
+                li.textContent = feltet.nev;
+                this.elem.appendChild(li);
+            });
+        }
+    }
+ 
+    // ===== PIZZA OSZTÁLY =====
+    class Pizza extends AlapElem {
+        constructor(id) {
+            super(id);
+        }
+ 
+        randomPozicio(radius, center) {
+            const angle = Math.random() * 2 * Math.PI;
+            const r = Math.sqrt(Math.random()) * radius;
+ 
+            const x = center + r * Math.cos(angle);
+            const y = center + r * Math.sin(angle);
+ 
+            return { x, y };
+        }
+ 
+        rajzol(feltetek) {
+            this.torles();
+ 
+            const center = this.elem.clientWidth / 2;
+            const radius = Math.max(80, center - 55);
+ 
+            feltetek.forEach(feltet => {
+                const db = Math.floor(Math.random() * 5) + 5; // 5-9 darab
+ 
+                for (let i = 0; i < db; i++) {
+                    const div = document.createElement("div");
+                    div.className = "feltet " + feltet.osztaly;
+ 
+                    const pos = this.randomPozicio(radius, center);
+                    const forgatas = Math.floor(Math.random() * 360);
+ 
+                    div.style.left = pos.x + "px";
+                    div.style.top = pos.y + "px";
+                    div.style.transform = "translate(-50%, -50%) rotate(" + forgatas + "deg)";
+ 
+                    this.elem.appendChild(div);
+                }
+            });
+        }
+    }
+ 
+    // ===== GENERÁTOR OSZTÁLY =====
+    class Generator {
+        constructor(lista, pizza) {
+            this.lista = lista;
+            this.pizza = pizza;
+ 
+            this.feltetek = [
+                { nev: "Sajt", osztaly: "sajt" },
+                { nev: "Szalámi", osztaly: "szalami" },
+                { nev: "Gomba", osztaly: "gomba" },
+                { nev: "Kukorica", osztaly: "kukorica" },
+                { nev: "Sonka", osztaly: "sonka" },
+                { nev: "Paprika", osztaly: "paprika" },
+                { nev: "Olíva", osztaly: "oliva" },
+                { nev: "Paradicsom", osztaly: "paradicsom" }
+            ];
+        }
+ 
+        kever() {
+            return [...this.feltetek].sort(() => Math.random() - 0.5);
+        }
+ 
+        uzenetMegjelenit(szoveg) {
+            const regi = document.getElementById("oojs-toast");
+            if (regi) {
+                regi.remove();
+            }
+ 
+            const uzenet = document.createElement("div");
+            uzenet.id = "oojs-toast";
+            uzenet.className = "oojs-toast";
+            uzenet.textContent = szoveg;
+ 
+            document.body.appendChild(uzenet);
+ 
+            setTimeout(() => {
+                const elem = document.getElementById("oojs-toast");
+                if (elem) {
+                    elem.remove();
+                }
+            }, 2000);
+        }
+ 
+        general() {
+            const db = Math.floor(Math.random() * 3) + 3; // 3-5 különböző feltét
+            const valasztott = this.kever().slice(0, db);
+ 
+            this.lista.render(valasztott);
+            this.pizza.rajzol(valasztott);
+            this.uzenetMegjelenit("Új pizza elkészült!");
+        }
+    }
+ 
+    let app;
+ 
+    function ujPizza() {
+        app.general();
+    }
+ 
+    document.addEventListener("DOMContentLoaded", () => {
+        const lista = new Lista("lista");
+        const pizza = new Pizza("pizza");
+ 
+        app = new Generator(lista, pizza);
+        app.general();
+    });
+</script>
+ 
+</body>
+</html>
