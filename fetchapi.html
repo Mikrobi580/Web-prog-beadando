@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fetch API CRUD - Pizza</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="navbar">
+        <div class="logo">RB Pizzéria</div>
+        <nav>
+            <ul class="nav-links">
+                <li><a href="index.html">Főoldal</a></li>
+                <li><a href="javascript.html">JavaScript CRUD</a></li>
+                <li><a href="react.html">React</a></li>
+                <li><a href="spa.html">SPA</a></li>
+                <li><a href="fetchapi.html" class="active">Fetch API</a></li>
+                <li><a href="axios.html">Axios</a></li>
+                <li><a href="oojs.html">OOJS</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section class="page-heading">
+            <h1>Fetch API CRUD</h1>
+            <p>A pizzák adatai MySQL adatbázisból érkeznek, a műveleteket PHP API kezeli.</p>
+        </section>
+
+        <form id="pizzaForm" class="form-container">
+            <input type="hidden" id="eredetiNev">
+            <div class="input-group">
+                <label for="nev">Pizza neve</label>
+                <input id="nev" required>
+            </div>
+            <div class="input-group">
+                <label for="kategorianev">Kategória</label>
+                <select id="kategorianev" required>
+                    <option value="">Válassz...</option>
+                    <option value="apród">apród</option>
+                    <option value="lovag">lovag</option>
+                    <option value="főnemes">főnemes</option>
+                    <option value="király">király</option>
+                </select>
+            </div>
+            <label class="check-row">
+                <input type="checkbox" id="vegetarianus">
+                Vegetáriánus
+            </label>
+            <button class="btn-primary" type="submit">Mentés</button>
+            <button class="btn-secondary" type="button" id="cancelEdit">Új rögzítés</button>
+        </form>
+
+        <p id="status" class="status"></p>
+        <div id="lista" class="pizza-grid"></div>
+    </main>
+
+    <footer class="footer">
+        <p>Készítette: Csordás Bence (BTWACN) | Nagy Róbert Levente (B2CPCL)</p>
+    </footer>
+
+    <script>
+        const API = "api.php";
+        const form = document.getElementById("pizzaForm");
+        const statusBox = document.getElementById("status");
+        const lista = document.getElementById("lista");
+        const eredetiNev = document.getElementById("eredetiNev");
+        const nev = document.getElementById("nev");
+        const kategorianev = document.getElementById("kategorianev");
+        const vegetarianus = document.getElementById("vegetarianus");
+
+        function html(text) {
+            return String(text)
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;");
+        }
+
+        function setStatus(text, type = "") {
+            statusBox.textContent = text;
+            statusBox.className = `status ${type}`;
+        }
+
+        async function apiRequest(method, body) {
+            const response = await fetch(API, {
+                method,
+                headers: { "Content-Type": "application/json" },
+                body: body ? JSON.stringify(body) : undefined
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || "Sikertelen kérés.");
+            }
+            return data;
+        }
+
+        async function load() {
+            try {
+                const response = await fetch(API);
+                const pizzak = await response.json();
+                lista.innerHTML = pizzak.map(p => `
+                    <article class="pizza-card">
+                        <h3>${html(p.nev)}</h3>
+                        <p><strong>Kategória:</strong> ${html(p.kategorianev)}</p>
+                        <p><strong>Ár:</strong> ${Number(p.ar || 0).toLocaleString("hu-HU")} Ft</p>
+                        <p><strong>Típus:</strong> ${Number(p.vegetarianus) === 1 ? "vegetáriánus" : "nem vegetáriánus"}</p>
+                        <button onclick='editPizza(${JSON.stringify(p)})'>Szerkesztés</button>
+                        <button onclick='deletePizza(${JSON.stringify(p.nev)})'>Törlés</button>
+                    </article>
+                `).join("");
+                setStatus(`${pizzak.length} pizza betöltve.`);
+            } catch (error) {
+                setStatus(error.message, "error");
+            }
+        }
+
+        function resetForm() {
+            form.reset();
+            eredetiNev.value = "";
+            setStatus("Új pizza rögzíthető.");
+        }
+
+        window.editPizza = function(pizza) {
+            eredetiNev.value = pizza.nev;
+            nev.value = pizza.nev;
+            kategorianev.value = pizza.kategorianev;
+            vegetarianus.checked = Number(pizza.vegetarianus) === 1;
+            setStatus(`${pizza.nev} szerkesztése folyamatban.`);
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        };
+
+        window.deletePizza = async function(pizzaNev) {
+            if (!confirm(`Biztosan törlöd ezt a pizzát: ${pizzaNev}?`)) return;
+            try {
+                await apiRequest("DELETE", { nev: pizzaNev });
+                resetForm();
+                await load();
+                setStatus("Pizza törölve.", "success");
+            } catch (error) {
+                setStatus(error.message, "error");
+            }
+        };
+
+        form.addEventListener("submit", async event => {
+            event.preventDefault();
+            const payload = {
+                eredetiNev: eredetiNev.value,
+                nev: nev.value.trim(),
+                kategorianev: kategorianev.value,
+                vegetarianus: vegetarianus.checked ? 1 : 0
+            };
+            try {
+                await apiRequest(payload.eredetiNev ? "PUT" : "POST", payload);
+                resetForm();
+                await load();
+                setStatus("Mentés kész.", "success");
+            } catch (error) {
+                setStatus(error.message, "error");
+            }
+        });
+
+        document.getElementById("cancelEdit").addEventListener("click", resetForm);
+        load();
+    </script>
+</body>
+</html>
